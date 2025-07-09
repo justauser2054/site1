@@ -44,6 +44,324 @@ interface RoomObject {
   };
 }
 
+interface Situation {
+  id: string;
+  day: number;
+  hour: number;
+  minute: number;
+  title: string;
+  description: string;
+  yesOption: {
+    effects: {
+      health?: number;
+      energy?: number;
+      sleep?: number;
+      social?: number;
+      productivity?: number;
+    };
+    score: number;
+    timeJump?: { hour: number; minute: number; day?: number };
+    consequence: string;
+  };
+  noOption: {
+    effects: {
+      health?: number;
+      energy?: number;
+      sleep?: number;
+      social?: number;
+      productivity?: number;
+    };
+    score: number;
+    timeJump?: { hour: number; minute: number; day?: number };
+    consequence: string;
+  };
+}
+
+const situations: Situation[] = [
+  // Primeira semana
+  {
+    id: 'early_meeting',
+    day: 1, // Segunda-feira
+    hour: 8,
+    minute: 0,
+    title: 'Reunião Matinal',
+    description: 'Alex acorda e recebe uma mensagem: seu chefe pediu para ele chegar 1h mais cedo no trabalho para uma reunião.',
+    yesOption: {
+      effects: { productivity: 15, sleep: -20, energy: -10 },
+      score: 10,
+      timeJump: { hour: 9, minute: 0 },
+      consequence: 'Alex chegou cedo, participou da reunião e impressionou o chefe, mas ficou com sono o dia todo.'
+    },
+    noOption: {
+      effects: { productivity: -10 },
+      score: -20,
+      timeJump: { hour: 8, minute: 0 },
+      consequence: 'Alex ignorou a mensagem do chefe e chegou no horário normal. Foi notado negativamente no trabalho.'
+    }
+  },
+  {
+    id: 'afternoon_nap',
+    day: 2, // Terça-feira
+    hour: 16,
+    minute: 0,
+    title: 'Soneca da Tarde',
+    description: 'Alex está exausto. Uma soneca rápida pode ajudar.',
+    yesOption: {
+      effects: { sleep: 20, energy: 15, productivity: -10 },
+      score: 5,
+      timeJump: { hour: 17, minute: 0 },
+      consequence: 'Alex cochilou e acordou renovado, mas perdeu o ritmo de trabalho.'
+    },
+    noOption: {
+      effects: { sleep: -15, energy: -10, productivity: 10 },
+      score: 10,
+      timeJump: { hour: 17, minute: 0 },
+      consequence: 'Alex resistiu ao cansaço e finalizou todas as suas tarefas.'
+    }
+  },
+  {
+    id: 'traffic_walk',
+    day: 3, // Quarta-feira
+    hour: 18,
+    minute: 0,
+    title: 'Trânsito Parado',
+    description: 'O trânsito está parado e Alex pode escolher entre ir pela rota mais longa a pé ou esperar no carro.',
+    yesOption: {
+      effects: { health: 10, energy: -15, productivity: 5 },
+      score: 5,
+      timeJump: { hour: 19, minute: 0 },
+      consequence: 'Alex caminhou por quase 1 hora, se exercitou, mas chegou suado e cansado.'
+    },
+    noOption: {
+      effects: { energy: -5, productivity: -5 },
+      score: -10,
+      timeJump: { hour: 20, minute: 0 },
+      consequence: 'Alex ficou preso no trânsito e se estressou, chegando atrasado.'
+    }
+  },
+  {
+    id: 'forgotten_lunch',
+    day: 4, // Quinta-feira
+    hour: 12,
+    minute: 0,
+    title: 'Almoço Esquecido',
+    description: 'Alex esqueceu o almoço em casa. Pode comprar algo rápido na rua.',
+    yesOption: {
+      effects: { health: -10, energy: 10, productivity: 5 },
+      score: 0,
+      timeJump: { hour: 13, minute: 0 },
+      consequence: 'Alex comeu algo rápido e industrializado, mas voltou ao trabalho com energia.'
+    },
+    noOption: {
+      effects: { health: -20, energy: -20, productivity: -10 },
+      score: -10,
+      timeJump: { hour: 15, minute: 0 },
+      consequence: 'Alex ficou o dia inteiro sem comer e não rendeu nada.'
+    }
+  },
+  {
+    id: 'romantic_date',
+    day: 5, // Sexta-feira
+    hour: 19,
+    minute: 0,
+    title: 'Encontro Romântico',
+    description: 'Alex foi convidado para um encontro romântico com uma colega do trabalho.',
+    yesOption: {
+      effects: { social: 10, health: -5, sleep: -10, energy: -10 },
+      score: 15,
+      timeJump: { hour: 23, minute: 0 },
+      consequence: 'Alex saiu, se divertiu e terminou a noite com um beijo. Promissor.'
+    },
+    noOption: {
+      effects: { social: -10, energy: 5, productivity: 10 },
+      score: 0,
+      timeJump: { hour: 21, minute: 0 },
+      consequence: 'Alex recusou o encontro e ficou em casa focado nos estudos.'
+    }
+  },
+  {
+    id: 'party_invitation',
+    day: 6, // Sábado
+    hour: 21,
+    minute: 0,
+    title: 'Festa com Amigos',
+    description: 'Alex foi chamado para uma festa com os amigos.',
+    yesOption: {
+      effects: { social: 20, health: -10, sleep: -25, energy: -20 },
+      score: -10,
+      timeJump: { hour: 5, minute: 0, day: 7 },
+      consequence: 'Alex se divertiu até tarde com os amigos, mas virou a noite.'
+    },
+    noOption: {
+      effects: { social: -10, productivity: 10, sleep: 15 },
+      score: 10,
+      timeJump: { hour: 6, minute: 0, day: 7 },
+      consequence: 'Alex recusou a festa e aproveitou para descansar e colocar a vida em ordem.'
+    }
+  },
+  {
+    id: 'family_lunch',
+    day: 7, // Domingo
+    hour: 11,
+    minute: 0,
+    title: 'Almoço em Família',
+    description: 'Alex pode visitar seus pais para um almoço de família.',
+    yesOption: {
+      effects: { social: 15, productivity: -5, energy: -10 },
+      score: 5,
+      timeJump: { hour: 15, minute: 0 },
+      consequence: 'Alex teve um almoço agradável com os pais, mas perdeu tempo para tarefas pessoais.'
+    },
+    noOption: {
+      effects: { social: -5, productivity: 10 },
+      score: 5,
+      timeJump: { hour: 13, minute: 0 },
+      consequence: 'Alex decidiu ficar em casa e organizou sua semana.'
+    }
+  },
+  // Segunda semana
+  {
+    id: 'help_colleague',
+    day: 8, // Segunda-feira
+    hour: 14,
+    minute: 0,
+    title: 'Ajuda ao Colega',
+    description: 'Um colega de trabalho pediu ajuda para terminar uma tarefa em equipe.',
+    yesOption: {
+      effects: { productivity: 10, energy: -10, social: 5 },
+      score: 5,
+      timeJump: { hour: 15, minute: 0 },
+      consequence: 'Alex ajudou o colega e foi elogiado por sua colaboração.'
+    },
+    noOption: {
+      effects: { social: -10 },
+      score: -5,
+      timeJump: { hour: 14, minute: 30 },
+      consequence: 'Alex ignorou o pedido e acabou sendo visto como pouco colaborativo.'
+    }
+  },
+  {
+    id: 'friend_argument',
+    day: 9, // Terça-feira
+    hour: 16,
+    minute: 0,
+    title: 'Briga com Amigo',
+    description: 'Alex teve uma discussão séria com seu melhor amigo. Pode tentar resolver ou deixar para depois.',
+    yesOption: {
+      effects: { social: 15, energy: -10, productivity: -5 },
+      score: 10,
+      timeJump: { hour: 18, minute: 0 },
+      consequence: 'Alex conversou com o amigo, se desculparam mutuamente e a amizade ficou mais forte.'
+    },
+    noOption: {
+      effects: { social: -20, energy: -15 },
+      score: -15,
+      timeJump: { hour: 16, minute: 30 },
+      consequence: 'Alex ignorou o problema e ficou remoendo a briga o resto do dia.'
+    }
+  },
+  {
+    id: 'morning_run',
+    day: 10, // Quarta-feira
+    hour: 6,
+    minute: 0,
+    title: 'Corrida Matinal',
+    description: 'Alex pode acordar cedo e ir correr no parque.',
+    yesOption: {
+      effects: { health: 20, sleep: -20, energy: 10 },
+      score: 10,
+      timeJump: { hour: 7, minute: 30 },
+      consequence: 'Alex correu 5km e começou o dia com disposição.'
+    },
+    noOption: {
+      effects: { health: -5, sleep: 10 },
+      score: 0,
+      timeJump: { hour: 8, minute: 0 },
+      consequence: 'Alex ficou mais um tempo na cama, mas perdeu a chance de se exercitar.'
+    }
+  },
+  {
+    id: 'headache_problem',
+    day: 11, // Quinta-feira
+    hour: 10,
+    minute: 0,
+    title: 'Dor de Cabeça',
+    description: 'Alex acordou com uma forte dor de cabeça. Pode tomar remédio e descansar ou tentar trabalhar assim mesmo.',
+    yesOption: {
+      effects: { health: 10, energy: 5, productivity: -10 },
+      score: 5,
+      timeJump: { hour: 11, minute: 30 },
+      consequence: 'Alex tomou remédio e descansou um pouco. A dor passou, mas perdeu tempo de trabalho.'
+    },
+    noOption: {
+      effects: { health: -15, energy: -20, productivity: -15 },
+      score: -10,
+      timeJump: { hour: 12, minute: 0 },
+      consequence: 'Alex tentou trabalhar com dor de cabeça e não conseguiu se concentrar em nada.'
+    }
+  },
+  {
+    id: 'impulse_shopping',
+    day: 12, // Sexta-feira
+    hour: 15,
+    minute: 0,
+    title: 'Compras por Impulso',
+    description: 'Alex viu uma promoção irresistível online. Pode gastar dinheiro em algo que não precisa.',
+    yesOption: {
+      effects: { social: 5, productivity: -15, energy: -5 },
+      score: -15,
+      timeJump: { hour: 16, minute: 30 },
+      consequence: 'Alex comprou várias coisas desnecessárias e se arrependeu depois.'
+    },
+    noOption: {
+      effects: { productivity: 10, energy: 5 },
+      score: 10,
+      timeJump: { hour: 15, minute: 30 },
+      consequence: 'Alex resistiu à tentação e se sentiu orgulhoso do autocontrole.'
+    }
+  },
+  {
+    id: 'weekend_trip',
+    day: 13, // Sábado
+    hour: 8,
+    minute: 0,
+    title: 'Viagem Bate-volta',
+    description: 'Um amigo convidou Alex para uma viagem bate-volta para a praia no último dia do desafio.',
+    yesOption: {
+      effects: { social: 25, health: 10, energy: -15, productivity: -20 },
+      score: 15,
+      timeJump: { hour: 22, minute: 0 },
+      consequence: 'Alex foi à praia, se divertiu muito e terminou o desafio com uma experiência incrível.'
+    },
+    noOption: {
+      effects: { social: -10, productivity: 15, sleep: 10 },
+      score: 5,
+      timeJump: { hour: 10, minute: 0 },
+      consequence: 'Alex ficou em casa, organizou tudo para a próxima semana e refletiu sobre o desafio.'
+    }
+  },
+  {
+    id: 'movie_night',
+    day: 14, // Domingo
+    hour: 20,
+    minute: 0,
+    title: 'Noite de Filme',
+    description: 'Alex pode assistir a um filme sozinho para relaxar antes da semana começar.',
+    yesOption: {
+      effects: { social: 5, sleep: -10, energy: -5 },
+      score: 5,
+      timeJump: { hour: 22, minute: 0 },
+      consequence: 'Alex assistiu a um filme envolvente e terminou o domingo relaxado.'
+    },
+    noOption: {
+      effects: { productivity: 5, sleep: 10 },
+      score: 5,
+      timeJump: { hour: 5, minute: 0, day: 15 },
+      consequence: 'Alex dormiu cedo e se preparou bem para a segunda-feira.'
+    }
+  }
+];
+
 const MobileGameInterface: React.FC<MobileGameInterfaceProps> = ({ onBack }) => {
   const { isDark } = useTheme();
   const { profilePicture, hasProfilePicture } = useProfilePicture();
@@ -82,6 +400,11 @@ const MobileGameInterface: React.FC<MobileGameInterfaceProps> = ({ onBack }) => 
   const [showPauseScreen, setShowPauseScreen] = useState(false);
   const [showWelcomeMessage, setShowWelcomeMessage] = useState(true);
   const [showResetConfirmation, setShowResetConfirmation] = useState(false);
+  
+  // Estados para o sistema de situações
+  const [currentSituation, setCurrentSituation] = useState<Situation | null>(null);
+  const [triggeredSituations, setTriggeredSituations] = useState<Set<string>>(new Set());
+  const [showSituationConsequence, setShowSituationConsequence] = useState<string | null>(null);
 
   // Carregar jogo salvo ao inicializar
   useEffect(() => {
@@ -89,17 +412,34 @@ const MobileGameInterface: React.FC<MobileGameInterfaceProps> = ({ onBack }) => 
     if (savedGame) {
       try {
         const parsedGame = JSON.parse(savedGame);
-        setGameState(parsedGame);
-        setShowWelcomeMessage(false); // Se há jogo salvo, não mostrar boas-vindas
+        setGameState(parsedGame.gameState || parsedGame);
+        setTriggeredSituations(new Set(parsedGame.triggeredSituations || []));
+        setShowWelcomeMessage(false);
       } catch (error) {
         console.error('Erro ao carregar jogo salvo:', error);
       }
     }
   }, []);
 
+  // Função para verificar situações
+  const checkForSituations = (day: number, hour: number, minute: number) => {
+    const situation = situations.find(s => 
+      s.day === day && 
+      s.hour === hour && 
+      s.minute === minute && 
+      !triggeredSituations.has(s.id)
+    );
+
+    if (situation) {
+      setCurrentSituation(situation);
+      setGameState(prev => ({ ...prev, isPlaying: false }));
+      setTriggeredSituations(prev => new Set([...prev, situation.id]));
+    }
+  };
+
   // Atualizar tempo quando o jogo estiver rodando
   useEffect(() => {
-    if (!gameState.isPlaying || showPauseScreen || showWelcomeMessage) return;
+    if (!gameState.isPlaying || showPauseScreen || showWelcomeMessage || currentSituation) return;
 
     const interval = setInterval(() => {
       setGameState(prev => {
@@ -116,6 +456,11 @@ const MobileGameInterface: React.FC<MobileGameInterfaceProps> = ({ onBack }) => 
           newDay += Math.floor(newHour / 24);
           newHour = newHour % 24;
         }
+
+        // Verificar situações após atualizar o tempo
+        setTimeout(() => {
+          checkForSituations(newDay, newHour, newMinute);
+        }, 100);
 
         // Degradação natural dos fatores
         const newFactors = { ...prev.factors };
@@ -138,7 +483,7 @@ const MobileGameInterface: React.FC<MobileGameInterfaceProps> = ({ onBack }) => 
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [gameState.isPlaying, gameState.gameSpeed, showPauseScreen, showWelcomeMessage]);
+  }, [gameState.isPlaying, gameState.gameSpeed, showPauseScreen, showWelcomeMessage, currentSituation, triggeredSituations]);
 
   const rooms = [
     { 
@@ -334,7 +679,7 @@ const MobileGameInterface: React.FC<MobileGameInterfaceProps> = ({ onBack }) => 
   ];
 
   const handleRoomChange = (direction: 'prev' | 'next') => {
-    if (isTransitioning || showPauseScreen || showWelcomeMessage) return;
+    if (isTransitioning || showPauseScreen || showWelcomeMessage || currentSituation) return;
     
     playNavigationSound();
     setIsTransitioning(true);
@@ -350,7 +695,7 @@ const MobileGameInterface: React.FC<MobileGameInterfaceProps> = ({ onBack }) => 
   };
 
   const togglePlay = () => {
-    if (showWelcomeMessage) return;
+    if (showWelcomeMessage || currentSituation) return;
     
     playButtonSound();
     if (gameState.isPlaying) {
@@ -371,18 +716,23 @@ const MobileGameInterface: React.FC<MobileGameInterfaceProps> = ({ onBack }) => 
   };
 
   const saveGame = () => {
-    if (showPauseScreen || showWelcomeMessage) return;
+    if (showPauseScreen || showWelcomeMessage || currentSituation) return;
     playButtonSound();
     
-    // Salvar o estado atual do jogo
-    localStorage.setItem('dream-story-save', JSON.stringify(gameState));
+    // Salvar o estado atual do jogo incluindo situações
+    const saveData = {
+      gameState,
+      triggeredSituations: Array.from(triggeredSituations),
+      timestamp: new Date().toISOString()
+    };
+    localStorage.setItem('dream-story-save', JSON.stringify(saveData));
     
     setShowSaveMessage(true);
     setTimeout(() => setShowSaveMessage(false), 2000);
   };
 
   const handleResetConfirmation = () => {
-    if (showPauseScreen || showWelcomeMessage) return;
+    if (showPauseScreen || showWelcomeMessage || currentSituation) return;
     playButtonSound();
     setShowResetConfirmation(true);
   };
@@ -413,7 +763,9 @@ const MobileGameInterface: React.FC<MobileGameInterfaceProps> = ({ onBack }) => 
     
     setShowPauseScreen(false);
     setShowResetConfirmation(false);
-    setShowWelcomeMessage(true); // Mostrar mensagem de boas-vindas novamente
+    setShowWelcomeMessage(true);
+    setCurrentSituation(null);
+    setTriggeredSituations(new Set());
   };
 
   const cancelReset = () => {
@@ -422,13 +774,13 @@ const MobileGameInterface: React.FC<MobileGameInterfaceProps> = ({ onBack }) => 
   };
 
   const setGameSpeed = (speed: number) => {
-    if (showPauseScreen || showWelcomeMessage) return;
+    if (showPauseScreen || showWelcomeMessage || currentSituation) return;
     playButtonSound();
     setGameState(prev => ({ ...prev, gameSpeed: speed }));
   };
 
   const handleObjectClick = (object: RoomObject) => {
-    if (showPauseScreen || showWelcomeMessage) return;
+    if (showPauseScreen || showWelcomeMessage || currentSituation) return;
     
     playNavigationSound();
     
@@ -528,12 +880,120 @@ const MobileGameInterface: React.FC<MobileGameInterfaceProps> = ({ onBack }) => 
     setShowWelcomeMessage(false);
   };
 
+  // Handlers para situações
+  const handleSituationChoice = (choice: 'yes' | 'no') => {
+    if (!currentSituation) return;
+
+    playButtonSound();
+
+    const option = choice === 'yes' ? currentSituation.yesOption : currentSituation.noOption;
+    
+    setGameState(prev => {
+      const newFactors = { ...prev.factors };
+      
+      // Aplicar efeitos
+      Object.entries(option.effects).forEach(([factor, change]) => {
+        if (factor in newFactors) {
+          newFactors[factor as keyof typeof newFactors] = Math.max(0, Math.min(100, 
+            newFactors[factor as keyof typeof newFactors] + change
+          ));
+        }
+      });
+
+      // Aplicar salto de tempo se houver
+      let newDay = prev.day;
+      let newHour = prev.hour;
+      let newMinute = prev.minute;
+
+      if (option.timeJump) {
+        newHour = option.timeJump.hour;
+        newMinute = option.timeJump.minute;
+        if (option.timeJump.day) {
+          newDay = option.timeJump.day;
+        }
+      }
+
+      return {
+        ...prev,
+        factors: newFactors,
+        score: prev.score + option.score,
+        day: newDay,
+        hour: newHour,
+        minute: newMinute,
+        isPlaying: true // Retomar o jogo automaticamente
+      };
+    });
+
+    // Mostrar consequência
+    setShowSituationConsequence(option.consequence);
+    setCurrentSituation(null);
+    
+    // Tocar som de consequência
+    playRandomConsequenceSound();
+    
+    setTimeout(() => {
+      setShowSituationConsequence(null);
+    }, 4000);
+  };
+
   const currentRoom = rooms[gameState.currentRoom];
   const currentObjects = roomObjects[gameState.currentRoom] || [];
 
   const formatTime = (hour: number, minute: number) => {
     return `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
   };
+
+  // Modal de Situação
+  if (currentSituation) {
+    return (
+      <div className={`h-screen flex items-center justify-center px-4 transition-colors duration-300 ${
+        isDark ? 'bg-slate-950' : 'bg-gradient-to-br from-white via-emerald-50/80 to-emerald-100/60'
+      }`}>
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div className={`max-w-md w-full rounded-3xl p-6 border-2 transition-all duration-300 transform scale-100 ${
+            isDark 
+              ? 'bg-gradient-to-br from-slate-900 to-slate-800 border-emerald-500/50 shadow-2xl' 
+              : 'bg-gradient-to-br from-white to-emerald-50 border-emerald-400/60 shadow-2xl'
+          }`}>
+            <div className="text-center">
+              <div className="w-20 h-20 bg-gradient-to-br from-amber-400 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg animate-pulse">
+                <span className="text-3xl">⚡</span>
+              </div>
+              <h3 className={`text-xl font-bold mb-3 transition-colors duration-300 ${
+                isDark ? 'text-white' : 'text-emerald-900'
+              }`}>
+                {currentSituation.title}
+              </h3>
+              <p className={`text-sm leading-relaxed mb-8 transition-colors duration-300 ${
+                isDark ? 'text-slate-300' : 'text-emerald-800'
+              }`}>
+                {currentSituation.description}
+              </p>
+              
+              <div className="space-y-4">
+                <button
+                  onClick={() => handleSituationChoice('yes')}
+                  className="w-full bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white py-4 px-6 rounded-2xl font-bold text-lg transition-all duration-200 transform hover:scale-105 shadow-lg"
+                >
+                  ✅ Sim
+                </button>
+                <button
+                  onClick={() => handleSituationChoice('no')}
+                  className={`w-full py-4 px-6 rounded-2xl font-bold text-lg transition-all duration-200 transform hover:scale-105 border-2 shadow-lg ${
+                    isDark 
+                      ? 'bg-gradient-to-r from-slate-700 to-slate-800 hover:from-slate-600 hover:to-slate-700 text-white border-slate-600' 
+                      : 'bg-gradient-to-r from-gray-100 to-gray-200 hover:from-gray-200 hover:to-gray-300 text-gray-900 border-gray-300'
+                  }`}
+                >
+                  ❌ Não
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   // Modal de Boas-vindas
   if (showWelcomeMessage) {
@@ -631,7 +1091,7 @@ const MobileGameInterface: React.FC<MobileGameInterfaceProps> = ({ onBack }) => 
       isDark ? 'bg-slate-950' : 'bg-gradient-to-br from-white via-emerald-50/80 to-emerald-100/60'
     }`}>
       
-      {/* SEÇÃO SUPERIOR - 15% da altura */}
+      {/* SEÇÃO SUPERIOR - 15% da altura - Botões maiores */}
       <header className={`h-[15vh] px-3 py-2 border-b transition-colors duration-300 ${
         isDark 
           ? 'bg-slate-900/95 border-slate-800' 
@@ -647,7 +1107,7 @@ const MobileGameInterface: React.FC<MobileGameInterfaceProps> = ({ onBack }) => 
                 onBack();
               }}
               disabled={showPauseScreen}
-              className={`p-2 rounded-full transition-all duration-200 hover:scale-110 ${
+              className={`p-3 rounded-full transition-all duration-200 hover:scale-110 min-w-[40px] min-h-[40px] flex items-center justify-center ${
                 showPauseScreen 
                   ? 'opacity-50 cursor-not-allowed' 
                   : isDark 
@@ -655,10 +1115,10 @@ const MobileGameInterface: React.FC<MobileGameInterfaceProps> = ({ onBack }) => 
                     : 'hover:bg-gray-100 text-gray-900'
               }`}
             >
-              <ArrowLeft className="w-4 h-4" />
+              <ArrowLeft className="w-5 h-5" />
             </button>
             
-            <div className="w-8 h-8 rounded-full overflow-hidden border-2 border-emerald-500/30">
+            <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-emerald-500/30">
               {hasProfilePicture ? (
                 <img
                   src={profilePicture!}
@@ -667,7 +1127,7 @@ const MobileGameInterface: React.FC<MobileGameInterfaceProps> = ({ onBack }) => 
                 />
               ) : (
                 <div className="w-full h-full bg-emerald-500 flex items-center justify-center">
-                  <User className="w-4 h-4 text-white" />
+                  <User className="w-5 h-5 text-white" />
                 </div>
               )}
             </div>
@@ -685,15 +1145,15 @@ const MobileGameInterface: React.FC<MobileGameInterfaceProps> = ({ onBack }) => 
             </div>
           </div>
 
-          {/* Centro - Controles do Jogo */}
+          {/* Centro - Controles do Jogo - Botões maiores */}
           <div className="flex flex-col items-center gap-1">
-            <div className="flex items-center gap-1">
-              {/* Botão de Salvar */}
+            <div className="flex items-center gap-2">
+              {/* Botão de Salvar - Maior */}
               <button
                 onClick={saveGame}
-                disabled={showPauseScreen || showWelcomeMessage}
-                className={`p-2 rounded-full transition-all duration-200 hover:scale-110 ${
-                  showPauseScreen || showWelcomeMessage
+                disabled={showPauseScreen || showWelcomeMessage || currentSituation}
+                className={`p-3 rounded-full transition-all duration-200 hover:scale-110 min-w-[40px] min-h-[40px] flex items-center justify-center ${
+                  showPauseScreen || showWelcomeMessage || currentSituation
                     ? 'opacity-50 cursor-not-allowed' 
                     : isDark 
                       ? 'hover:bg-slate-800 text-emerald-400' 
@@ -701,30 +1161,30 @@ const MobileGameInterface: React.FC<MobileGameInterfaceProps> = ({ onBack }) => 
                 }`}
                 title="Salvar Progresso"
               >
-                <span className="text-sm">💾</span>
+                <Save className="w-5 h-5" />
               </button>
 
-              {/* Botão Play/Pause */}
+              {/* Botão Play/Pause - Maior */}
               <button
                 onClick={togglePlay}
-                disabled={showWelcomeMessage}
-                className={`p-2 rounded-full transition-all duration-200 hover:scale-110 ${
-                  showWelcomeMessage
+                disabled={showWelcomeMessage || currentSituation}
+                className={`p-3 rounded-full transition-all duration-200 hover:scale-110 min-w-[44px] min-h-[44px] flex items-center justify-center ${
+                  showWelcomeMessage || currentSituation
                     ? 'opacity-50 cursor-not-allowed bg-gray-400'
                     : gameState.isPlaying && !showPauseScreen
                       ? 'bg-red-500 hover:bg-red-600 text-white'
                       : 'bg-emerald-500 hover:bg-emerald-600 text-white'
                 }`}
               >
-                {gameState.isPlaying && !showPauseScreen ? <Pause className="w-3 h-3" /> : <Play className="w-3 h-3" />}
+                {gameState.isPlaying && !showPauseScreen ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5" />}
               </button>
 
-              {/* Botão de Reset */}
+              {/* Botão de Reset - Maior */}
               <button
                 onClick={handleResetConfirmation}
-                disabled={showPauseScreen || showWelcomeMessage}
-                className={`p-2 rounded-full transition-all duration-200 hover:scale-110 ${
-                  showPauseScreen || showWelcomeMessage
+                disabled={showPauseScreen || showWelcomeMessage || currentSituation}
+                className={`p-3 rounded-full transition-all duration-200 hover:scale-110 min-w-[40px] min-h-[40px] flex items-center justify-center ${
+                  showPauseScreen || showWelcomeMessage || currentSituation
                     ? 'opacity-50 cursor-not-allowed' 
                     : isDark 
                       ? 'hover:bg-slate-800 text-orange-400' 
@@ -732,20 +1192,20 @@ const MobileGameInterface: React.FC<MobileGameInterfaceProps> = ({ onBack }) => 
                 }`}
                 title="Reiniciar Jogo"
               >
-                <span className="text-sm">🔄</span>
+                <RotateCcw className="w-5 h-5" />
               </button>
 
-              {/* Botão de Mute */}
+              {/* Botão de Mute - Maior */}
               <button
                 onClick={handleMuteToggle}
-                className={`p-2 rounded-full transition-all duration-200 hover:scale-110 ${
+                className={`p-3 rounded-full transition-all duration-200 hover:scale-110 min-w-[40px] min-h-[40px] flex items-center justify-center ${
                   isDark 
                     ? 'hover:bg-slate-800 text-blue-400' 
                     : 'hover:bg-gray-100 text-blue-600'
                 }`}
                 title={audioSettings.isMuted ? "Ativar Som" : "Mutar Som"}
               >
-                <span className="text-sm">{audioSettings.isMuted ? '🔇' : '🔊'}</span>
+                {audioSettings.isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
               </button>
             </div>
             
@@ -764,15 +1224,15 @@ const MobileGameInterface: React.FC<MobileGameInterfaceProps> = ({ onBack }) => 
             </div>
           </div>
 
-          {/* Lado Direito - Velocidade */}
+          {/* Lado Direito - Velocidade - Botões maiores */}
           <div className="flex items-center gap-1">
             {[1, 2, 4].map((speed) => (
               <button
                 key={speed}
                 onClick={() => setGameSpeed(speed)}
-                disabled={showPauseScreen || showWelcomeMessage}
-                className={`px-2 py-1 rounded text-xs font-bold transition-all duration-200 ${
-                  showPauseScreen || showWelcomeMessage
+                disabled={showPauseScreen || showWelcomeMessage || currentSituation}
+                className={`px-3 py-2 rounded text-xs font-bold transition-all duration-200 min-w-[36px] min-h-[36px] flex items-center justify-center ${
+                  showPauseScreen || showWelcomeMessage || currentSituation
                     ? 'opacity-50 cursor-not-allowed' 
                     : gameState.gameSpeed === speed
                       ? 'bg-emerald-500 text-white'
@@ -830,7 +1290,7 @@ const MobileGameInterface: React.FC<MobileGameInterfaceProps> = ({ onBack }) => 
         {/* Cenário do Cômodo */}
         <div className={`h-full relative transition-all duration-300 ${
           isTransitioning ? 'scale-95 opacity-50' : 'scale-100 opacity-100'
-        } ${showPauseScreen ? 'pointer-events-none' : ''}`}>
+        } ${showPauseScreen || currentSituation ? 'pointer-events-none' : ''}`}>
           <div className={`h-full bg-gradient-to-br ${currentRoom.background} flex flex-col items-center justify-center relative ${
             isDark ? 'text-white' : 'text-gray-900'
           }`}>
@@ -859,9 +1319,9 @@ const MobileGameInterface: React.FC<MobileGameInterfaceProps> = ({ onBack }) => 
                 <button
                   key={object.id}
                   onClick={() => handleObjectClick(object)}
-                  disabled={showPauseScreen}
-                  className={`absolute p-3 rounded-full backdrop-blur-sm transition-all duration-200 hover:scale-110 border-2 ${
-                    showPauseScreen 
+                  disabled={showPauseScreen || currentSituation}
+                  className={`absolute p-3 rounded-full backdrop-blur-sm transition-all duration-200 hover:scale-110 border-2 min-w-[48px] min-h-[48px] flex items-center justify-center ${
+                    showPauseScreen || currentSituation
                       ? 'opacity-50 cursor-not-allowed' 
                       : isDark 
                         ? 'bg-slate-800/80 hover:bg-slate-700 text-white border-slate-600 hover:border-slate-500' 
@@ -874,7 +1334,7 @@ const MobileGameInterface: React.FC<MobileGameInterfaceProps> = ({ onBack }) => 
                   }}
                   title={object.name}
                 >
-                  <IconComponent className="w-5 h-5" />
+                  <IconComponent className="w-6 h-6" />
                 </button>
               );
             })}
@@ -897,29 +1357,29 @@ const MobileGameInterface: React.FC<MobileGameInterfaceProps> = ({ onBack }) => 
           </div>
         </div>
 
-        {/* Setas de Navegação */}
+        {/* Setas de Navegação - Maiores */}
         <button
           onClick={() => handleRoomChange('prev')}
-          disabled={isTransitioning || showPauseScreen}
-          className={`absolute left-4 top-1/2 transform -translate-y-1/2 p-3 rounded-full backdrop-blur-sm transition-all duration-200 hover:scale-110 ${
+          disabled={isTransitioning || showPauseScreen || currentSituation}
+          className={`absolute left-4 top-1/2 transform -translate-y-1/2 p-4 rounded-full backdrop-blur-sm transition-all duration-200 hover:scale-110 min-w-[56px] min-h-[56px] flex items-center justify-center ${
             isDark 
               ? 'bg-slate-800/80 hover:bg-slate-700 text-white border border-slate-700' 
               : 'bg-white/90 hover:bg-gray-100 text-gray-900 border border-gray-200 shadow-lg'
-          } ${(isTransitioning || showPauseScreen) ? 'opacity-50 cursor-not-allowed' : ''}`}
+          } ${(isTransitioning || showPauseScreen || currentSituation) ? 'opacity-50 cursor-not-allowed' : ''}`}
         >
-          <ChevronLeft className="w-6 h-6" />
+          <ChevronLeft className="w-7 h-7" />
         </button>
         
         <button
           onClick={() => handleRoomChange('next')}
-          disabled={isTransitioning || showPauseScreen}
-          className={`absolute right-4 top-1/2 transform -translate-y-1/2 p-3 rounded-full backdrop-blur-sm transition-all duration-200 hover:scale-110 ${
+          disabled={isTransitioning || showPauseScreen || currentSituation}
+          className={`absolute right-4 top-1/2 transform -translate-y-1/2 p-4 rounded-full backdrop-blur-sm transition-all duration-200 hover:scale-110 min-w-[56px] min-h-[56px] flex items-center justify-center ${
             isDark 
               ? 'bg-slate-800/80 hover:bg-slate-700 text-white border border-slate-700' 
               : 'bg-white/90 hover:bg-gray-100 text-gray-900 border border-gray-200 shadow-lg'
-          } ${(isTransitioning || showPauseScreen) ? 'opacity-50 cursor-not-allowed' : ''}`}
+          } ${(isTransitioning || showPauseScreen || currentSituation) ? 'opacity-50 cursor-not-allowed' : ''}`}
         >
-          <ChevronRight className="w-6 h-6" />
+          <ChevronRight className="w-7 h-7" />
         </button>
       </main>
 
@@ -977,7 +1437,7 @@ const MobileGameInterface: React.FC<MobileGameInterfaceProps> = ({ onBack }) => 
                         <span className={`text-xs font-bold transition-colors duration-300 ${
                           isDark ? 'text-white' : 'text-gray-900'
                         }`}>
-                          {value}%
+                          {Math.round(value)}%
                         </span>
                       </div>
                     </div>
@@ -1025,7 +1485,7 @@ const MobileGameInterface: React.FC<MobileGameInterfaceProps> = ({ onBack }) => 
                         <span className={`text-xs font-bold transition-colors duration-300 ${
                           isDark ? 'text-white' : 'text-gray-900'
                         }`}>
-                          {value}%
+                          {Math.round(value)}%
                         </span>
                       </div>
                     </div>
@@ -1088,13 +1548,31 @@ const MobileGameInterface: React.FC<MobileGameInterfaceProps> = ({ onBack }) => 
         </div>
       )}
 
-      {/* Mensagem de Consequência */}
+      {/* Mensagem de Consequência de Objetos */}
       {showConsequence && (
         <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50">
           <div className={`max-w-xs p-4 rounded-xl shadow-lg transition-all duration-300 ${
             isDark ? 'bg-slate-800 text-white border border-slate-700' : 'bg-white text-gray-900 border border-gray-200'
           }`}>
             <p className="text-sm text-center">{showConsequence}</p>
+          </div>
+        </div>
+      )}
+
+      {/* Mensagem de Consequência de Situações */}
+      {showSituationConsequence && (
+        <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50">
+          <div className={`max-w-sm p-6 rounded-2xl shadow-2xl transition-all duration-300 border-2 ${
+            isDark 
+              ? 'bg-gradient-to-br from-slate-900 to-slate-800 text-white border-emerald-500/50' 
+              : 'bg-gradient-to-br from-white to-emerald-50 text-gray-900 border-emerald-400/60'
+          }`}>
+            <div className="text-center">
+              <div className="w-12 h-12 bg-emerald-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                <span className="text-2xl">📖</span>
+              </div>
+              <p className="text-sm text-center leading-relaxed">{showSituationConsequence}</p>
+            </div>
           </div>
         </div>
       )}
@@ -1106,7 +1584,7 @@ const MobileGameInterface: React.FC<MobileGameInterfaceProps> = ({ onBack }) => 
             isDark ? 'bg-emerald-600 text-white' : 'bg-emerald-500 text-white'
           }`}>
             <div className="flex items-center gap-2">
-              <span className="text-sm">💾</span>
+              <Save className="w-4 h-4" />
               <span className="text-sm font-medium">Jogo salvo!</span>
             </div>
           </div>
